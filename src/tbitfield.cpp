@@ -145,10 +145,16 @@ istream &operator>>(istream &istr, TBitField &bf) // ввод
     int i = 0;
     char temp;
 
-    while (1) {
+    for (; ;) {
         istr >> temp;
-        if (temp == '0') bf.ClrBit(i++);
-        else if (temp == '1') bf.SetBit(i++);
+        if (temp == '0') {
+            bf.ClrBit(i);
+            i++;
+        }
+        else if (temp == '1') {
+            bf.SetBit(i);
+            i++;
+        }
         else break;
     }
 
