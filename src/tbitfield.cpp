@@ -6,6 +6,7 @@
 // Битовое поле
 
 #include "tbitfield.h"
+#pragma warning( disable : 26451)
 
 // Fake variables used as placeholders in tests
 static const int FAKE_INT = -1;
@@ -44,7 +45,7 @@ TELEM TBitField::GetMemMask(const int n) const // битовая маска дл
 {
     if ((n < 0) || (n >= BitLen)) throw 0;
 
-    return 1 << (n % (8 * sizeof(TELEM) - 1));
+    return 1 << n;
 }
 
 #pragma region access to bits of a bitfield
@@ -128,12 +129,18 @@ TBitField TBitField::operator&(const TBitField &bf) // операция "и"
 
 TBitField TBitField::operator~(void) // отрицание
 {
-    int length = BitLen;
-    TBitField tempField(length);
+    TBitField tempField(BitLen);
+    for (int i = 0; i < MemLen; i++) {
 
-    for (int i = 0; i < BitLen; i++)
-        if (GetBit(i) == 0) tempField.SetBit(i);
-        else tempField.ClrBit(i);
+        tempField.pMem[i] = ~pMem[i];
+    }
+    *this = tempField;
+
+    int lastNumBit = BitLen - (MemLen - 1) * (sizeof(TELEM) * 8);
+    if (lastNumBit < sizeof(TELEM) * 8) {
+        int mask = (1 << (lastNumBit)) - 1;
+        tempField.pMem[MemLen - 1] &= mask;
+    }
 
     return tempField;
 }
